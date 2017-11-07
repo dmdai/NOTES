@@ -1,0 +1,56 @@
+---
+layout:     post                    # 使用的布局（不需要改）
+title:      Ubuntu16.04安装TensorFlow-GPU版本              # 标题 
+subtitle:    安装Tensorflow-GPU          #副标题
+date:       2017-11-7              # 时间
+author:     DDM                      # 作者
+header-img: img/post-bg-2015.jpg    #这篇文章标题背景图片
+catalog: true                       # 是否归档
+tags:    Linux; TensorFlow                             #标签
+---
+
+
+之前因为安装tensorflow-gpu版本，简直快让我烦到爆炸，刚开始装的时候也是不怎么懂，就闷着头上网搜安装教程，大致了解到有两种安装方法：1）源码安装；2）pip安装。
+
+因为根据源码安装tf的过程中踩过得坑实在太多，所以我最后是用pip安装，这里主要介绍pip安装tensorflow-gpu版本的步骤：
+
+1）安装对应的显卡驱动，最简单且方便的做法就是在“设置”的“附加驱动”里直接安装nvidia的驱动（需要重启才能更新）；
+
+2）安装CUDA8.0：其实就是下载cuda_8.0.61_375.26_linux-run，但是这个地方我实在被坑过太多次：大家切忌不要从官网下载，官网默认是CUDA9.0版本，而tensorflow暂时还不支持9.0，但是呢，从官网下载的CUDA8.0版本总是下载到中途任务失败。这里贴出我自己下载的cuda_8.0.61_375.26_linux-run链接（ https://pan.baidu.com/s/1o8wsg3K 密码: i4hn）。
+
+然后在终端输入：
+```
+chmod +x cuda_8.0.61_375.26_linux-run
+sudo sh cuda_8.0.61_375.26_linux-run --override --silent --toolkit
+```
+安装的cuda在/usr/local/cuda下面！
+
+3.安装cudnn 8.0 v6.0，注意一定要装6.0的（从官网下载cudnn-8.0-linux-x64- v6.0.tgz，这个官网可以下载），不然后面会出现这种问题：ImportError:libcudart.so.6.0:cannotopen shared object file:No such file or directory.
+
+下载完之后在终端输入：
+```
+sudo cp cudnn-8.0-linux-x64-v6.0.tgz /usr/local/cuda
+cd /usr/local/cuda
+tar -xzvf cudnn-8.0-linux-x64-v6.0.tgz
+sudo cp cuda/include/cudnn.h  /usr/local/cuda/include
+sudo cp cuda/lib64/libcudnn*  /usr/local/cuda/lib64
+sudo chmod a+r /usr/local/cuda/include/cudnn.h  /usr/local/cuda/lib64/libcudnn*
+```
+4）配置CUDA环境变量：将下面两个路径加入到环境变量中。
+```
+sudo gedit ~/.bashrc
+```
+在打开的编辑器末尾添加：
+```
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/cuda/lib64:/usr/local/cuda/extras/CUPTI/lib64"
+export CUDA_HOME=/usr/local/cuda
+```
+保存并在终端输入
+```
+source ~/.bashrc。
+```
+5）因为我采用的是pip安装，所以到这一步就超级简单了！！！直接在终端输入
+```
+sudo pip3 install tensorflow-gpu
+```
+等待安装完成即可！！！（这时候就可以看出更改了pip源之后下载速度简直光速提升！不然估计要下到吐...具体方法[可看](http://www.jianshu.com/p/b942f98524a8)
